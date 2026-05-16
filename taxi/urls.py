@@ -34,7 +34,7 @@ urlpatterns = [
     path(
         "manufacturers/<int:pk>/update/",
         ManufacturerUpdateView.as_view(),
-        name="manufacturer      -update",
+        name="manufacturer-update",
     ),
     path(
         "manufacturers/<int:pk>/delete/",

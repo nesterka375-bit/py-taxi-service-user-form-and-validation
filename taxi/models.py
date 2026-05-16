@@ -19,13 +19,6 @@ class Driver(AbstractUser):
     license_number = models.CharField(
         max_length=8,
         unique=True,
-        validators=[
-            RegexValidator(
-                regex=r"^[A-Z]{3}\d{5}$",
-                message="License number must consist "
-                        "of 3 uppercase letters and 5 digits."
-            )
-        ]
     )
 
     class Meta:
