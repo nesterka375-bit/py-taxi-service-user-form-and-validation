@@ -2,8 +2,21 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-
 from taxi.models import Driver, Car
+
+
+def validate_license_number(license_number: str) -> str:
+    if len(license_number) != 8:
+        raise ValidationError("License_number must be 8 digits")
+    elif not (
+            license_number[:3].isalpha()
+            and license_number[:3].isupper()):
+        raise ValidationError("First 3 elements of license_number "
+                              "must only contain upper letters")
+    elif not license_number[3:].isdigit():
+        raise ValidationError("Last 5 elements of license_number "
+                              "must only contain digits")
+    return license_number
 
 
 class DriverCreateForm(UserCreationForm):
@@ -15,6 +28,9 @@ class DriverCreateForm(UserCreationForm):
             "license_number",
         )
 
+    def clean_license_number(self):
+        return validate_license_number(self.cleaned_data["license_number"])
+
 
 class DriverLicenseUpdateForm(forms.ModelForm):
     class Meta:
@@ -22,23 +38,12 @@ class DriverLicenseUpdateForm(forms.ModelForm):
         fields = ("license_number",)
 
     def clean_license_number(self):
-        license_number = self.cleaned_data["license_number"]
-        if len(license_number) != 8:
-            raise ValidationError("License_number must be 8 digits")
-        elif not (
-                license_number[:3].isalpha()
-                and license_number[:3].isupper()):
-            raise ValidationError("First 3 elements of license_number "
-                                  "must only contain upper letters")
-        elif not license_number[3:].isdigit():
-            raise ValidationError("Last 5 elements of license_number "
-                                  "must only contain digits")
-        return license_number
+        return validate_license_number(self.cleaned_data["license_number"])
 
 
 class CarForm(forms.ModelForm):
     drivers = forms.ModelMultipleChoiceField(
-        queryset=get_user_model().objects.all(),
+        queryset=Driver.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
